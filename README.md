@@ -46,7 +46,7 @@ I will first define the module in our root main.tf (not the one within the modul
 Lab_VPC is a variable defined in the vpc module that we’ll plan to build. For now you’ll want to understand that we’re defining the VPC’s CIDR block, enabling DNS support, specifying the availability zones, and adding tags to the VPC. These values allow us to customize our network and will be passed to the vpc module.
 
 Setting cidr_block to 10.0.0.0/16 will create a VPC with that network.
-Enabling dns_hostnames and dns_support will allow our instances to resolve DNS names and have DNS resolution which is required for SSM to work.
+Enabling dns_hostnames and dns_support will allow our instances to resolve DNS names and have DNS resolution.
 Setting availability_zones to ["us-east-1a", "us-east-1b"] will create the VPC’s subnets in us-east-1a and us-east-1b respectively. The module is capable of scaling subnets and associated network components into multiple availability zones if desired.
 Finally we are setting tags
 
