@@ -82,60 +82,26 @@ Now let’s create a route table for the public subnets. We’re associating the
 
 Modules/vpc/main.tf
 
-     # create a route table for the public subnets
-     resource "aws_route_table" "public" {
-       vpc_id = aws_vpc.vpc.id
-       route {
-         cidr_block = "0.0.0.0/0"
-         gateway_id = aws_internet_gateway.igw.id
-       }
-     }
-     
-     # Associate the route table with the public subnets
-     resource "aws_route_table_association" "public" {
-       count          = local.num_of_public_subnets       # creates an association for each public subnet
-       subnet_id      = aws_subnet.public[count.index].id # gets each public subnet id
-       route_table_id = aws_route_table.public.id         # adds the associations to the route table
-     }
+<img width="563" height="343" alt="image" src="https://github.com/user-attachments/assets/ea44a5c0-1af6-408e-8d2d-9aa8610bcc0f" />
+
+<img width="496" height="106" alt="image" src="https://github.com/user-attachments/assets/9a5009aa-820b-45f7-8b4f-f5c58801c36e" />
+
+
 <h2>Create Private Subnets</h2>
 
 Modules/vpc/main.tf
 
 ##### Private Subnets and Associated Route Tables #####
      
-     # create private subnets
-     resource "aws_subnet" "private" {
-       count             = local.num_of_private_subnets                           # creates a subnet for each availability zone
-       vpc_id            = aws_vpc.vpc.id                                         # assigns the subnet to the VPC
-       availability_zone = var.lab_vpc.availability_zones[count.index]         # assigns each subnet to an availability zone
-       cidr_block        = cidrsubnet(aws_vpc.vpc.cidr_block, 4, count.index + 1) # function that automatically creates subnet CIDR blocks based on the VPC CIDR block
-       tags = {
-         "Name" = "tf_private_subnet_${count.index + 1}"
-       }
-     }
+<img width="670" height="415" alt="image" src="https://github.com/user-attachments/assets/b2b823d0-849e-465e-8b63-966425a7c135" />
 
 In this section, we’re creating private subnets. The process is similar to creating public subnets but our CIDR block is generated slightly differently so the subnets don’t overlap with the public subnets. Subnetting can get a little bit tricky, so if you’re not already familiar with it, I would highly recommend checking out the documentation for the cidrsubnet() function
 
 <h2>Route table associations for private subnet</h2>
 Modules/vpc/main.tf
 
-     # create route tables for each private
-     resource "aws_route_table" "private" {
-       count  = local.num_of_private_subnets
-       vpc_id = aws_vpc.vpc.id
-     
-       route {
-         cidr_block     = "0.0.0.0/0"
-         nat_gateway_id = aws_nat_gateway.ngw[count.index].id
-       }
-     }
-     
-     # Associate the route tables with the private subnets
-     resource "aws_route_table_association" "private" {
-       count          = local.num_of_private_subnets                        # creates an association for each private subnet
-       subnet_id      = aws_subnet.private[count.index].id                  # gets each private subnet id
-       route_table_id = element(aws_route_table.private[*].id, count.index) # associates the private subnets with each private route tables
-     }
+   <img width="514" height="300" alt="image" src="https://github.com/user-attachments/assets/1ab3649c-d11c-4ee1-82b4-012d25260d1d" />
+
 
 In this section, we’re creating and associating the route table with the private subnets and creating a route to the NAT Gateway. This route will allow non-local traffic to be sent to the NAT Gateway and out to the internet.
 
@@ -144,26 +110,7 @@ Finally, let’s create the Elastic IP and NAT Gateway resources. The NAT Gatewa
 
 Modules/vpc/main.tf
 
-     # Create an Elastic IP for each NAT Gateway
-     resource "aws_eip" "ngw" {
-       count = local.num_of_public_subnets # Number of NAT Gateways
-     
-       tags = {
-         "Name" = "tf_nat_gateway_${count.index + 1}"
-       }
-     }
-     
-     # Create a NAT Gateway for each public subnet
-     resource "aws_nat_gateway" "ngw" {
-       count         = local.num_of_public_subnets                   # creates a NAT Gateway for each public subnet
-       allocation_id = element(aws_eip.ngw[*].id, count.index)       # assigns an Elastic IP to each NAT Gateway
-       subnet_id     = element(aws_subnet.public[*].id, count.index) # assigns each NAT Gateway to a public subnet
-       depends_on    = [aws_internet_gateway.igw]                    # NAT Gateway depends on the Internet Gateway
-     
-       tags = {
-         "Name" = "tf_nat_gateway_${count.index + 1}"
-       }
-     }
+  <img width="410" height="304" alt="image" src="https://github.com/user-attachments/assets/b5d3bf50-5483-404a-aec9-7045928f7dba" />
 
 <h2>Task 1.3: VPC Module Outputs File</h2>
 
@@ -171,16 +118,8 @@ Before we wrap up with our VPC, let’s go ahead and output values. We’ll want
 
 Modules/vpc/outputs.tf
 
-     # output map of vpc related resources
-     output "vpc_resources" {
-       value = {
-         vpc_id              = aws_vpc.vpc.id
-         public_subnet_ids   = aws_subnet.public[*].id
-         private_subnet_ids  = aws_subnet.private[*].id
-         internet_gateway_id = aws_internet_gateway.igw.id
-         nat_gateway_ids     = aws_nat_gateway.ngw[*].id
-       }
-     }
+<img width="555" height="232" alt="image" src="https://github.com/user-attachments/assets/88ebf95a-1111-426c-943c-08b6b134277e" />
+
 
 That’s it for the VPC module! We’ve created a network with subnets, route tables, NAT Gateway, and Internet Gateway. We’ve also tagged our resources for easy identification. Let’s move on to deployment to test this out and make sure it works!
 
