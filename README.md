@@ -63,7 +63,7 @@ availability_zones is a list of strings that should be in square brackets e.g., 
 tags is a map of strings that should be in curly brackets
 Within the description, we’ve got an <<EOT followed by a description and ending with EOT. EOT, if you’re not familiar, is used for multi-line strings where we start with << and then a delimiter, in this case EOT to indicate where it starts and where it ends. So it’s not providing functionality, it’s just helping us write a larger description
 
-<img width="617" height="290" alt="image" src="https://github.com/user-attachments/assets/eef147d6-86fb-4773-8581-99cce4642a22" />
+<img width="591" height="378" alt="image" src="https://github.com/user-attachments/assets/25b2831a-096c-48f6-93b3-81cc95e61b2c" />
 
 Now, let’s begin creating the VPC module’s main.tf file.
 
