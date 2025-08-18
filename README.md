@@ -102,24 +102,14 @@ Mdules/vpc/main.tf
     
     Now that we have a VPC, we need to create resources within it.
     
-    <h2>Public Subnets</h2>
-    Let’s start by creating public subnets.
+<h2>Public Subnets</h2>
+
+Let’s start by creating public subnets.
     
-    Modules/vpc/main.tf
-    
-    ##### Public Subnets and Associated Route Tables #####
-    
-         # create public subnets
-         resource "aws_subnet" "public" {
-           count             = local.num_of_public_subnets                            # creates a subnet for each availability zone
-           vpc_id            = aws_vpc.vpc.id                                         # assigns the subnet to the VPC
-           availability_zone = var.lab_vpc.availability_zones[count.index]         # assigns each subnet to an availability zone
-           cidr_block        = cidrsubnet(aws_vpc.vpc.cidr_block, 2, count.index + 1) # function that automatically creates subnet CIDR blocks based on the VPC CIDR block
-           tags = {
-             "Name" = "tf_public_subnet_${count.index + 1}"
-           }
-         }
-         
+ Modules/vpc/main.tf
+  
+   <img width="587" height="170" alt="image" src="https://github.com/user-attachments/assets/d9b0258f-049e-452e-b926-4d3212cb7ddb" />
+
 
 In this section, we’re creating subnets based on the number of availability zones provided in the vpc_config variable. If we provide two availability zones, then a subnet will be created and associated with each zone. The CIDR block for each subnet is automatically generated based on the VPC CIDR block by using the terraform cidrsubnet function. The subnets are tagged with a name e.g., tf_public_subnet_1 and tf_public_subnet_2 if we have two availability zones.
 
