@@ -23,25 +23,8 @@ It’s time to get started! Go ahead and create a brand new directory (I’ll na
 
 I will first define the module in our root main.tf (not the one within the modules directory) file. /main.tf
 
-      ##Create a Network Module##
-    module "lab_vpc"{
-      source = "./modules/vpc"
-      
-      lab_vpc = {
-          cidr_block    =        "10.0.0.0/16"
-          enable_dns_host_names = true
-          enable_dns_support = true
-          availability_zones = [ "us-east-1a" , "us-east-1b" ]
-  
-          tags = {
-              name = "tf_main"
-          }
-  
-      }
-    }
+<img width="572" height="365" alt="image" src="https://github.com/user-attachments/assets/15a378d2-8adb-4dec-be94-2b8e86e13250" />
 
-    #Get region#
-    data "aws_region" "current" {}
 
 Lab_VPC is a variable defined in the vpc module that we’ll plan to build. For now you’ll want to understand that we’re defining the VPC’s CIDR block, enabling DNS support, specifying the availability zones, and adding tags to the VPC. These values allow us to customize our network and will be passed to the vpc module.
 
