@@ -183,6 +183,7 @@ The private subnets are each associated with a NAT Gateway in their respective a
     terraform destroy
 
 
+<img width="806" height="249" alt="image" src="https://github.com/user-attachments/assets/2fbf60b4-a363-42da-9faa-cafdf54cd58c" />
 
 
 
