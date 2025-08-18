@@ -1,5 +1,7 @@
 <h1>Build a VPC network from scratch in Terraform.</h1>
-
+<h2>Lab Overview</h2>
+Amazon Virtual Private Cloud (Amazon VPC) gives you the ability to provision a logically isolated section of the Amazon Web Services (AWS) Cloud where you can launch AWS resources in a virtual network that you define. You have complete control over your virtual networking environment, including selecting your IP address ranges, creating subnets, and configuring route tables and network gateways.
+In this lab, you Terraform to build a virtual private cloud (VPC) and other network components required to deploy resources, such as an Amazon Elastic Compute Cloud (Amazon EC2) instance.
 
 <h2>Objectives</h2>
 By the end of this lab, you should be able to do the following:
@@ -15,30 +17,33 @@ Building VPC allow us to define the CIDR block and Availability Zones and automa
 
 
 <h1>Building the Virtual Private Cloud module</h1>
-It’s time to get started! Go ahead and create a brand new directory (I’ll name mine project-vpc), and within that directory, create the necessary files and directories for this project as outlined below. We’ll fill them in as we go along. 
+It’s time to get started! Go ahead and create a brand new directory (I’ll name mine Networking), and within that directory, create the necessary files and directories for this project as outlined below. We’ll fill them in as we go along. 
 
 <h1>Task 1: VPC Module</h1>
-The VPC module will be the first we create and deploy. This will build our network infrastructure and create the necessary subnets, route tables, NAT Gateway, and Internet Gateway. Everything else will be built on top of this module.
 
 I will first define the module in our root main.tf (not the one within the modules directory) file. /main.tf
 
-#VPC Network #
-module "networking" {
-  source = "./modules/vpc"
+      ##Create a Network Module##
+    module "lab_vpc"{
+      source = "./modules/vpc"
+      
+      lab_vpc = {
+          cidr_block    =        "10.0.0.0/16"
+          enable_dns_host_names = true
+          enable_dns_support = true
+          availability_zones = [ "us-east-1a" , "us-east-1b" ]
   
-       vpc_confi =   = {
-             cidr_block           = "10.0.0.0/16"
-         enable_dns_hostnames     = true
-         enable_dns_support       = true
-         availability_zones       = ["us-east-1a", "us-east-1b"]
-         tags = {
-           "Name" = "main"
-         }
-       }
-     }
+          tags = {
+              name = "tf_main"
+          }
+  
+      }
+    }
 
+    #Get region#
+    data "aws_region" "current" {}
 
-vpc_config is a variable defined in the vpc module that we’ll plan to build. For now you’ll want to understand that we’re defining the VPC’s CIDR block, enabling DNS support, specifying the availability zones, and adding tags to the VPC. These values allow us to customize our network and will be passed to the vpc module.
+Lab_VPC is a variable defined in the vpc module that we’ll plan to build. For now you’ll want to understand that we’re defining the VPC’s CIDR block, enabling DNS support, specifying the availability zones, and adding tags to the VPC. These values allow us to customize our network and will be passed to the vpc module.
 
 Setting cidr_block to 10.0.0.0/16 will create a VPC with that network.
 Enabling dns_hostnames and dns_support will allow our instances to resolve DNS names and have DNS resolution which is required for SSM to work.
@@ -72,53 +77,49 @@ Next, let’s create the VPC and Internet Gateway resources. The VPC resource is
 
 Mdules/vpc/main.tf
 
-     # create local variables to store the number of public and private subnets
-     locals {
-       num_of_public_subnets  = length(var.vpc_config.availability_zones)
-       num_of_private_subnets = length(var.vpc_config.availability_zones)
-     }
-     
-     # data source to get the current region
-     data "aws_region" "current" {}
-     
-     ##### VPC block #####
-     
-     # create a vpc
-     resource "aws_vpc" "vpc" {
-       cidr_block           = var.vpc_config.cidr_block
-       enable_dns_hostnames = var.vpc_config.enable_dns_hostnames
-       enable_dns_support   = var.vpc_config.enable_dns_support
-       tags                 = var.vpc_config.tags
-     }
-     
-     # create an Internet Gateway for vpc
-     resource "aws_internet_gateway" "igw" {
-       vpc_id = aws_vpc.vpc.id
-       tags = {
-         "Name" = "main_igw"
-       }
-     }
-
-Now that we have a VPC, we need to create resources within it.
-
-<h2>Public Subnets</h2>
-Let’s start by creating public subnets.
-
-Modules/vpc/main.tf
-
-##### Public Subnets and Associated Route Tables #####
-
-     # create public subnets
-     resource "aws_subnet" "public" {
-       count             = local.num_of_public_subnets                            # creates a subnet for each availability zone
-       vpc_id            = aws_vpc.vpc.id                                         # assigns the subnet to the VPC
-       availability_zone = var.vpc_config.availability_zones[count.index]         # assigns each subnet to an availability zone
-       cidr_block        = cidrsubnet(aws_vpc.vpc.cidr_block, 2, count.index + 1) # function that automatically creates subnet CIDR blocks based on the VPC CIDR block
-       tags = {
-         "Name" = "tf_public_subnet_${count.index + 1}"
-       }
-     }
-     
+       variable "lab_vpc" {
+        type = object({
+          cidr_block = string
+          enable_dns_host_names = optional(bool, true)
+          enable_dns_support    = optional(bool, true)
+          availability_zones    = list(string)
+    
+          tags = map(string)
+        })
+      
+    
+    description = <<EOT
+      Configuration options for the VPC:
+      - cidr_block: The CIDR block for the VPC.
+      - enable_dns_hostnames: Enable or disable DNS hostnames for the VPC (default: true).
+      - enable_dns_support: Enable or disable DNS support within the VPC (default: true).
+      - availability_zones: A list of availability zones to create subnets in (optional).
+      - vpc_tags: A map of tags to apply to the VPC (optional).
+    EOT
+    
+    }
+    
+    
+    Now that we have a VPC, we need to create resources within it.
+    
+    <h2>Public Subnets</h2>
+    Let’s start by creating public subnets.
+    
+    Modules/vpc/main.tf
+    
+    ##### Public Subnets and Associated Route Tables #####
+    
+         # create public subnets
+         resource "aws_subnet" "public" {
+           count             = local.num_of_public_subnets                            # creates a subnet for each availability zone
+           vpc_id            = aws_vpc.vpc.id                                         # assigns the subnet to the VPC
+           availability_zone = var.lab_vpc.availability_zones[count.index]         # assigns each subnet to an availability zone
+           cidr_block        = cidrsubnet(aws_vpc.vpc.cidr_block, 2, count.index + 1) # function that automatically creates subnet CIDR blocks based on the VPC CIDR block
+           tags = {
+             "Name" = "tf_public_subnet_${count.index + 1}"
+           }
+         }
+         
 
 In this section, we’re creating subnets based on the number of availability zones provided in the vpc_config variable. If we provide two availability zones, then a subnet will be created and associated with each zone. The CIDR block for each subnet is automatically generated based on the VPC CIDR block by using the terraform cidrsubnet function. The subnets are tagged with a name e.g., tf_public_subnet_1 and tf_public_subnet_2 if we have two availability zones.
 
@@ -154,7 +155,7 @@ Modules/vpc/main.tf
      resource "aws_subnet" "private" {
        count             = local.num_of_private_subnets                           # creates a subnet for each availability zone
        vpc_id            = aws_vpc.vpc.id                                         # assigns the subnet to the VPC
-       availability_zone = var.vpc_config.availability_zones[count.index]         # assigns each subnet to an availability zone
+       availability_zone = var.lab_vpc.availability_zones[count.index]         # assigns each subnet to an availability zone
        cidr_block        = cidrsubnet(aws_vpc.vpc.cidr_block, 4, count.index + 1) # function that automatically creates subnet CIDR blocks based on the VPC CIDR block
        tags = {
          "Name" = "tf_private_subnet_${count.index + 1}"
