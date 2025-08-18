@@ -60,7 +60,7 @@ Next, let’s create the VPC and Internet Gateway resources. The VPC resource is
 
 Mdules/vpc/main.tf
 
-    <img width="517" height="119" alt="image" src="https://github.com/user-attachments/assets/e7b1c7b7-1671-4984-942c-983fe992de8c" />
+<img width="517" height="119" alt="image" src="https://github.com/user-attachments/assets/e7b1c7b7-1671-4984-942c-983fe992de8c" />
 
 Now that we have a VPC, we need to create resources within it.
     
