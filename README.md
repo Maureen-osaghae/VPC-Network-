@@ -180,6 +180,8 @@ The private subnets are each associated with a NAT Gateway in their respective a
     • Created a VPC with a private and public subnet, an internet gateway, and a NAT gateway
     • Configured route tables associated with subnets to local and internet-bound traffic by using an internet gateway and a NAT gateway
 
+    terraform destroy
+
 
 
 
