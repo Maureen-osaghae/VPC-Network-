@@ -1,5 +1,6 @@
-<h1>Build a VPC network from scratch in Terraform.</h1>
+<h1>Build a VPC network from scratch using Terraform.</h1>
 <h2>Lab Overview</h2>
+Create a fully functional VPC with public and private subnets, route tables, NAT Gateways, and an Internet Gateway. All using Terraform.
 Amazon Virtual Private Cloud (Amazon VPC) gives you the ability to provision a logically isolated section of the Amazon Web Services (AWS) Cloud where you can launch AWS resources in a virtual network that you define. You have complete control over your virtual networking environment, including selecting your IP address ranges, creating subnets, and configuring route tables and network gateways.
 In this lab, you Terraform to build a virtual private cloud (VPC) and other network components required to deploy resources, such as an Amazon Elastic Compute Cloud (Amazon EC2) instance.
 
@@ -121,7 +122,73 @@ Modules/vpc/outputs.tf
 <img width="555" height="232" alt="image" src="https://github.com/user-attachments/assets/88ebf95a-1111-426c-943c-08b6b134277e" />
 
 
+
 That’s it for the VPC module! We’ve created a network with subnets, route tables, NAT Gateway, and Internet Gateway. We’ve also tagged our resources for easy identification. Let’s move on to deployment to test this out and make sure it works!
+
+<h1>Testing deployment of our VPC</h1>
+
+From the root directory, we should have the following files defined:
+
+main.tf
+
+<img width="409" height="313" alt="image" src="https://github.com/user-attachments/assets/16e49bf2-d526-42a8-93a1-6a411b0aa36e" />
+
+provider.tf
+<img width="312" height="107" alt="image" src="https://github.com/user-attachments/assets/21aaa715-b693-44df-884c-eb878f1e75dc" />
+
+
+Configure your AWS CLI
+
+<img width="548" height="140" alt="image" src="https://github.com/user-attachments/assets/a6a1946e-d065-4feb-af5e-13826a4729bd" />
+
+After configuring the ClI, we need to initialize the terraform configuration.
+
+<img width="703" height="275" alt="image" src="https://github.com/user-attachments/assets/121fbdce-ceee-4741-80b5-01ad7ef0c050" />
+
+Validate and format the code: 
+
+    terraform validate
+
+<img width="533" height="193" alt="image" src="https://github.com/user-attachments/assets/d34e0b33-e4cd-40f6-906e-50a875ec6720" />
+
+Next, run a plan. The full output won’t be shown here but you should see a plan to create 17 resources from the VPC module.
+
+    terraform plan
+
+<img width="926" height="400" alt="image" src="https://github.com/user-attachments/assets/359322fa-23b2-4755-b571-5b1235096020" />
+
+Finally, apply the changes to build the module.
+
+    terraform apply
+
+<img width="795" height="72" alt="image" src="https://github.com/user-attachments/assets/c04dc7ab-c8ad-4571-9b50-b6f67c66c923" />
+
+ 
+Once the resources get created, we can navigate to the AWS Management Console using the lab’s provided credentials to view the VPC network we’ve built. Search for VPC and click on “Your VPCs” in the menu, and then select the VPC created and click the ‘Resource map’ tab to see the network flow.
+
+<img width="958" height="134" alt="image" src="https://github.com/user-attachments/assets/5ada9d1b-bdae-4d59-959c-d25754965754" />
+
+If you highlight on vpc_igw as seen in the image below, you’ll see how only the public subnets are associated with the Internet Gateway.
+
+<img width="797" height="198" alt="image" src="https://github.com/user-attachments/assets/4a54d45c-bae4-4496-9f5d-dfeb5b046668" />
+
+The private subnets are each associated with a NAT Gateway in their respective availability zones.
+
+<img width="760" height="188" alt="image" src="https://github.com/user-attachments/assets/743a73e5-7454-4708-99a8-7fe2137eb47a" />
+
+<h1>Conclusion & Terraform Destroy</h1>
+    • Created a VPC with a private and public subnet, an internet gateway, and a NAT gateway
+    • Configured route tables associated with subnets to local and internet-bound traffic by using an internet gateway and a NAT gateway
+
+
+
+
+
+
+
+
+
+
 
 
 
